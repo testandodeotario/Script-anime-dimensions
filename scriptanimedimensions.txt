@@ -1,3 +1,5 @@
+-- Script de trapaça para Anime Dimensions (uso exclusivo para treinamento de IA anti-cheat)
+
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local RunService = game:GetService("RunService")
@@ -44,20 +46,41 @@ end
 local function criarHUD()
     local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
     local Frame = Instance.new("Frame", ScreenGui)
-    Frame.Size = UDim2.new(0.3, 0, 0.6, 0)
-    Frame.Position = UDim2.new(0.35, 0, 0.2, 0)
+    Frame.Size = UDim2.new(0.3, 0, 0.8, 0)
+    Frame.Position = UDim2.new(0.35, 0, 0.1, 0)
     Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Frame.BorderSizePixel = 0
 
     local Title = Instance.new("TextLabel", Frame)
     Title.Text = "Menu de Trapaça"
-    Title.Size = UDim2.new(1, 0, 0.2, 0)
+    Title.Size = UDim2.new(1, 0, 0.1, 0)
+    Title.Position = UDim2.new(0, 0, 0, 0)
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.BackgroundTransparency = 1
+    Title.Font = Enum.Font.SourceSansBold
+    Title.TextScaled = true
+
+    local closeButton = Instance.new("TextButton", Frame)
+    closeButton.Text = "X"
+    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+    closeButton.Position = UDim2.new(0.9, 0, 0, 0)
+    closeButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.BackgroundTransparency = 1
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextScaled = true
+    closeButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
 
     local DimensoesCheckbox = Instance.new("TextButton", Frame)
     DimensoesCheckbox.Text = "Farmar Dimensão"
     DimensoesCheckbox.Size = UDim2.new(0.8, 0, 0.1, 0)
-    DimensoesCheckbox.Position = UDim2.new(0.1, 0, 0.25, 0)
+    DimensoesCheckbox.Position = UDim2.new(0.1, 0, 0.15, 0)
+    DimensoesCheckbox.TextColor3 = farmDimensao and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+    DimensoesCheckbox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    DimensoesCheckbox.BorderSizePixel = 0
+    DimensoesCheckbox.Font = Enum.Font.SourceSansBold
+    DimensoesCheckbox.TextScaled = true
     DimensoesCheckbox.MouseButton1Click:Connect(function()
         farmDimensao = not farmDimensao
         DimensoesCheckbox.TextColor3 = farmDimensao and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
@@ -66,7 +89,12 @@ local function criarHUD()
     local AutoSkillCheckbox = Instance.new("TextButton", Frame)
     AutoSkillCheckbox.Text = "Auto-Skill"
     AutoSkillCheckbox.Size = UDim2.new(0.8, 0, 0.1, 0)
-    AutoSkillCheckbox.Position = UDim2.new(0.1, 0, 0.35, 0)
+    AutoSkillCheckbox.Position = UDim2.new(0.1, 0, 0.25, 0)
+    AutoSkillCheckbox.TextColor3 = autoSkill and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+    AutoSkillCheckbox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    AutoSkillCheckbox.BorderSizePixel = 0
+    AutoSkillCheckbox.Font = Enum.Font.SourceSansBold
+    AutoSkillCheckbox.TextScaled = true
     AutoSkillCheckbox.MouseButton1Click:Connect(function()
         autoSkill = not autoSkill
         AutoSkillCheckbox.TextColor3 = autoSkill and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
@@ -75,73 +103,12 @@ local function criarHUD()
     local AutoLootCheckbox = Instance.new("TextButton", Frame)
     AutoLootCheckbox.Text = "Auto-Loot"
     AutoLootCheckbox.Size = UDim2.new(0.8, 0, 0.1, 0)
-    AutoLootCheckbox.Position = UDim2.new(0.1, 0, 0.45, 0)
+    AutoLootCheckbox.Position = UDim2.new(0.1, 0, 0.35, 0)
+    AutoLootCheckbox.TextColor3 = autoLoot and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+    AutoLootCheckbox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    AutoLootCheckbox.BorderSizePixel = 0
+    AutoLootCheckbox.Font = Enum.Font.SourceSansBold
+    AutoLootCheckbox.TextScaled = true
     AutoLootCheckbox.MouseButton1Click:Connect(function()
         autoLoot = not autoLoot
-        AutoLootCheckbox.TextColor3 = autoLoot and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
-    end)
-end
-
--- Função para selecionar dimensão com base no nível
-local function selecionarDimensao()
-    local nivel = obterNivelJogador()
-    local dimensao = dimensoes[1].name
-    for _, v in ipairs(dimensoes) do
-        if nivel >= v.level then
-            dimensao = v.name
-        else
-            break
-        end
-    end
-    teleportarParaNovoLugar(dimensao)
-end
-
--- Função Auto-Skill
-local function autoSkillFunc()
-    while autoSkill do
-        local attack = ReplicatedStorage:FindFirstChild("AttackService")
-        if attack then
-            attack:InvokeServer()
-        end
-        RunService.Heartbeat:Wait()
-    end
-end
-
--- Função Auto-Loot
-local function autoLootFunc()
-    while autoLoot do
-        for _, item in pairs(Workspace:GetChildren()) do
-            if item:IsA("Model") and item.Name == "Loot" then
-                player.Character:MoveTo(item.Position)
-                wait(0.5)
-            end
-        end
-        RunService.Heartbeat:Wait()
-    end
-end
-
--- Função ESP
-local function esp()
-    while espEnabled do
-        for _, obj in pairs(Workspace:GetChildren()) do
-            if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
-                if not obj:FindFirstChild("BoxHandleAdornment") then
-                    local box = Instance.new("BoxHandleAdornment", obj)
-                    box.Adornee = obj.PrimaryPart
-                    box.Size = obj.PrimaryPart.Size
-                    box.Color3 = Color3.fromRGB(255, 0, 0)
-                    box.AlwaysOnTop = true
-                    box.ZIndex = 10
-                    box.Transparency = 0.5
-                end
-            end
-        end
-        RunService.Heartbeat:Wait()
-    end
-end
-
--- Iniciar HUD e funções
-criarHUD()
-spawn(autoSkillFunc)
-spawn(autoLootFunc)
-spawn(esp)
+        AutoLootCheckbox.TextColor3 = autoLoot and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255,
