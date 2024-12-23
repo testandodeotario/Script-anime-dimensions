@@ -1,0 +1,147 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GuiService = game:GetService("GuiService")
+local Workspace = game:GetService("Workspace")
+
+-- Variáveis de configuração
+local dimensoes = {
+    {name = "Giant Dimension", level = 1},
+    {name = "Demon Dimension", level = 16},
+    {name = "Curse Dimension", level = 31},
+    {name = "Villain Dimension", level = 46},
+    {name = "Sword Dimension", level = 61},
+    {name = "Ghoul Dimension", level = 76},
+    {name = "Fate Dimension", level = 91},
+    {name = "Slime Dimension", level = 106},
+    {name = "Devil Dimension", level = 121},
+    {name = "Pirate Dimension", level = 131},
+    {name = "Alien Dimension", level = 141},
+    {name = "Level Dimension", level = 151}
+}
+
+local raids = {}
+local bossRush = "Boss Rush"
+local timeChallenges = "Time Challenges"
+
+local espEnabled = true
+local farmDimensao = false
+local participarRaid = false
+local autoSkill = true
+local autoLoot = true
+
+-- Função para obter nível do jogador local
+local function obterNivelJogador()
+    local leaderstats = player:FindFirstChild("leaderstats")
+    if leaderstats and leaderstats:FindFirstChild("Level") then
+        return leaderstats.Level.Value
+    end
+    return 0
+end
+
+-- Função para criar HUD
+local function criarHUD()
+    local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+    local Frame = Instance.new("Frame", ScreenGui)
+    Frame.Size = UDim2.new(0.3, 0, 0.6, 0)
+    Frame.Position = UDim2.new(0.35, 0, 0.2, 0)
+    Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+    local Title = Instance.new("TextLabel", Frame)
+    Title.Text = "Menu de Trapaça"
+    Title.Size = UDim2.new(1, 0, 0.2, 0)
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.BackgroundTransparency = 1
+
+    local DimensoesCheckbox = Instance.new("TextButton", Frame)
+    DimensoesCheckbox.Text = "Farmar Dimensão"
+    DimensoesCheckbox.Size = UDim2.new(0.8, 0, 0.1, 0)
+    DimensoesCheckbox.Position = UDim2.new(0.1, 0, 0.25, 0)
+    DimensoesCheckbox.MouseButton1Click:Connect(function()
+        farmDimensao = not farmDimensao
+        DimensoesCheckbox.TextColor3 = farmDimensao and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+    end)
+
+    local AutoSkillCheckbox = Instance.new("TextButton", Frame)
+    AutoSkillCheckbox.Text = "Auto-Skill"
+    AutoSkillCheckbox.Size = UDim2.new(0.8, 0, 0.1, 0)
+    AutoSkillCheckbox.Position = UDim2.new(0.1, 0, 0.35, 0)
+    AutoSkillCheckbox.MouseButton1Click:Connect(function()
+        autoSkill = not autoSkill
+        AutoSkillCheckbox.TextColor3 = autoSkill and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+    end)
+
+    local AutoLootCheckbox = Instance.new("TextButton", Frame)
+    AutoLootCheckbox.Text = "Auto-Loot"
+    AutoLootCheckbox.Size = UDim2.new(0.8, 0, 0.1, 0)
+    AutoLootCheckbox.Position = UDim2.new(0.1, 0, 0.45, 0)
+    AutoLootCheckbox.MouseButton1Click:Connect(function()
+        autoLoot = not autoLoot
+        AutoLootCheckbox.TextColor3 = autoLoot and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+    end)
+end
+
+-- Função para selecionar dimensão com base no nível
+local function selecionarDimensao()
+    local nivel = obterNivelJogador()
+    local dimensao = dimensoes[1].name
+    for _, v in ipairs(dimensoes) do
+        if nivel >= v.level then
+            dimensao = v.name
+        else
+            break
+        end
+    end
+    teleportarParaNovoLugar(dimensao)
+end
+
+-- Função Auto-Skill
+local function autoSkillFunc()
+    while autoSkill do
+        local attack = ReplicatedStorage:FindFirstChild("AttackService")
+        if attack then
+            attack:InvokeServer()
+        end
+        RunService.Heartbeat:Wait()
+    end
+end
+
+-- Função Auto-Loot
+local function autoLootFunc()
+    while autoLoot do
+        for _, item in pairs(Workspace:GetChildren()) do
+            if item:IsA("Model") and item.Name == "Loot" then
+                player.Character:MoveTo(item.Position)
+                wait(0.5)
+            end
+        end
+        RunService.Heartbeat:Wait()
+    end
+end
+
+-- Função ESP
+local function esp()
+    while espEnabled do
+        for _, obj in pairs(Workspace:GetChildren()) do
+            if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
+                if not obj:FindFirstChild("BoxHandleAdornment") then
+                    local box = Instance.new("BoxHandleAdornment", obj)
+                    box.Adornee = obj.PrimaryPart
+                    box.Size = obj.PrimaryPart.Size
+                    box.Color3 = Color3.fromRGB(255, 0, 0)
+                    box.AlwaysOnTop = true
+                    box.ZIndex = 10
+                    box.Transparency = 0.5
+                end
+            end
+        end
+        RunService.Heartbeat:Wait()
+    end
+end
+
+-- Iniciar HUD e funções
+criarHUD()
+spawn(autoSkillFunc)
+spawn(autoLootFunc)
+spawn(esp)
